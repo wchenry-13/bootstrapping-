@@ -19,6 +19,8 @@ set.seed(1)
 ## boostrapping in slr 
 
 ```{r}
+#generate a relevant sample 
+
 n_samp = 250
 
 sim_df_const = 
@@ -50,5 +52,43 @@ sim_df |>
 lm(y ~ x, data = sim_df_const) |> 
   broom::tidy() |> 
   knitr::kable(digits = 3)
+```
+
+```{r}
+lm(y ~ x, data = sim_df_nonconst) |> 
+  broom::tidy() |> 
+  knitr::kable(digits = 3)
+```
+
+## drawing one bootstrap sample 
+
+```{r}
+boot_sample = function(df) {
+  sample_frac(df, replace = TRUE)
+}
+```
+
+```{r}
+##is the function working?
+
+boot_sample(sim_df_nonconst) |> 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point(alpha = .5) +
+  stat_smooth(method = "lm")
+
+#yes
+```
+
+## drawing many bootstrap samples 
+
+```{r}
+boot_straps = 
+  tibble(strap_number = 1:1000) |> 
+  mutate(
+    strap_sample = map(strap_number, \(i) boot_sample(df = sim_df_nonconst))
+  )
+
+boot_straps
+
 ```
 
